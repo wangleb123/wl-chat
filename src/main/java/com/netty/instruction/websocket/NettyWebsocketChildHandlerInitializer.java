@@ -18,11 +18,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class NettyWebsocketChildHandlerInitializer extends ChannelInitializer<SocketChannel> {
 
-    @Autowired
-    private NettyWebSocketServerHandler webSocketServerHandler = new NettyWebSocketServerHandler();
+    private final NettyWebSocketServerHandler webSocketServerHandler;
 
-    @Autowired
-    private NettyHttpRequestHandler httpRequestHandler = new NettyHttpRequestHandler();
+    private final NettyHttpRequestHandler httpRequestHandler;
+
+    public NettyWebsocketChildHandlerInitializer(NettyWebSocketServerHandler webSocketServerHandler, NettyHttpRequestHandler httpRequestHandler) {
+        this.webSocketServerHandler = webSocketServerHandler;
+        this.httpRequestHandler = httpRequestHandler;
+    }
 
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {

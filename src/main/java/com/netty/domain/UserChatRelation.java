@@ -59,7 +59,7 @@ public class UserChatRelation {
     @Setter
     @Getter
     @Column(name = "remarks", columnDefinition = "bigint(19) DEFAULT NULL COMMENT '群组或者好友备注'")
-    private Long remarks;
+    private String remarks;
 
 
     /**

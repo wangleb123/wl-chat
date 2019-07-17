@@ -7,6 +7,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.Future;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,7 +28,8 @@ public class NettyWebSocketServer implements Runnable {
 
     private static final int RECVBYTE_ALLOCATOR_SIZE = 592048;
     private static final Integer PORT = 1235;
-    private NettyWebsocketChildHandlerInitializer childChannelHandler = new NettyWebsocketChildHandlerInitializer();
+    @Autowired
+    private NettyWebsocketChildHandlerInitializer childChannelHandler;
     private ChannelFuture serverChannelFuture;
 
     NettyWebSocketServer(){}

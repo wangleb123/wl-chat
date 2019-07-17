@@ -1,16 +1,23 @@
 package com.netty.domain.domainservice;
 
 import com.alibaba.fastjson.JSONObject;
+import com.netty.domain.Group;
+import com.netty.domain.UserChatRelation;
+import com.netty.domain.repository.GroupsRepository;
+import com.netty.domain.repository.UserChatRepository;
 import com.netty.instruction.Constant;
 import com.netty.instruction.ResponseResult;
 import com.netty.instruction.TypeEnums;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author ：冉野
@@ -23,6 +30,13 @@ import java.text.MessageFormat;
 @Slf4j
 public class ChatServiceImpl implements ChatService {
 
+    private final GroupsRepository groupsRepository;
+    private final UserChatRepository userChatRepository;
+
+    public ChatServiceImpl(GroupsRepository groupsRepository, UserChatRepository userChatRepository) {
+        this.groupsRepository = groupsRepository;
+        this.userChatRepository = userChatRepository;
+    }
 
 
     /**
@@ -79,6 +93,29 @@ public class ChatServiceImpl implements ChatService {
      */
     @Override
     public void sendGroup(JSONObject param, ChannelHandlerContext ctx) {
+
+        String fromUserId = String.valueOf(param.get("fromUserId"));
+        String toGroupId = String.valueOf(param.get("toGroupId"));
+        String content = String.valueOf(param.get("content"));
+
+        Group group = groupsRepository.findOne(Long.valueOf(toGroupId));
+        if (null == group) {
+            String responseResult = JSONObject.toJSONString(new ResponseResult().error("该群不存在！"));
+            sendMessageToClient(ctx, responseResult);
+        } else {
+            String responseResult = JSONObject.toJSONString(new ResponseResult()
+                    .success()
+                    .setData("fromUserId", fromUserId)
+                    .setData("content", content)
+                    .setData("toGroupId", toGroupId)
+                    .setData("type", TypeEnums.GROUP_SENDING));
+            Optional<List<UserChatRelation>> groupRelations = userChatRepository.findAllByGroupId(Long.valueOf(toGroupId));
+            log.info("查询群成员数据：[{}]",groupRelations.get().toString());
+            groupRelations.ifPresent(userChatRelations -> userChatRelations.stream()
+                    .filter(y->!Objects.equals(y.getUserId(),Long.valueOf(fromUserId)))
+                    .forEach(x -> sendMessageToClient(Constant.onlineUserMap.get(String.valueOf(x.getUserId())),responseResult)));
+
+        }
 
     }
 

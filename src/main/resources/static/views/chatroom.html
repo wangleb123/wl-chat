@@ -136,7 +136,7 @@
         socket.onmessage = function(event){  
             var json = JSON.parse(event.data);
             //var json = event.data;
-            console.log("当前json数据为：" + json)
+            console.log("当前json数据为：" + json.status + "-类型-" + json.data.type)
             // {msg=ok, data={type=REGISTER}, status=200}
             if (json.status === 200) {
                 var type = json.data.type;

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author ：冉野
@@ -17,6 +18,13 @@ import java.util.List;
 public interface UserChatRepository extends JpaRepository<UserChatRelation,Long> {
 
 
+    /**
+     * 通过GroupId 查询群
+     *
+     * @param groupId 群id
+     * @return 返回用户群关系对象
+     */
+    Optional<List<UserChatRelation>> findAllByGroupId(Long groupId);
 
 
 

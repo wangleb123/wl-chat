@@ -1,5 +1,6 @@
 package com.netty.instruction;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.netty.instruction.websocket.NettyWebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.*;
 
 /**
  * @author ：冉野
@@ -21,16 +25,21 @@ import javax.annotation.PreDestroy;
 @Slf4j
 public class ApplicationContext {
 
-    @Autowired
-    private NettyWebSocketServer webSocketServer;
-
-    private Thread nettyThread;
+    private final NettyWebSocketServer webSocketServer;
+    /**
+     * newFixedThreadPool和newSingleThreadExecutor:  主要问题是堆积的请求处理队列可能会耗费非常大的内存，甚至OOM。
+     * newCachedThreadPool和newScheduledThreadPool:  主要问题是线程数最大数是Integer.MAX_VALUE，可能会创建数量非常多的线程，甚至OOM。
+     */
+    ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("thread-netty_chat-runner-%d").build();
+    ExecutorService executor = new ThreadPoolExecutor(Constant.THEAD_SIZE,Constant.THEAD_SIZE,0L,TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),namedThreadFactory);
+    public ApplicationContext(NettyWebSocketServer webSocketServer) {
+        this.webSocketServer = webSocketServer;
+    }
 
     @PostConstruct
     public void init() {
-        nettyThread = new Thread(webSocketServer);
+        executor.submit(webSocketServer);
         log.info("netty线程已经开启");
-        nettyThread.start();
     }
 
 
@@ -43,10 +52,7 @@ public class ApplicationContext {
     @PreDestroy
     public void close() {
         log.info("正在释放Netty Websocket相关连接...");
-        webSocketServer.close();
-        log.info("正在关闭Netty Websocket服务器线程...");
-        nettyThread.stop();
-        log.info("系统成功关闭！");
+        executor.shutdown();
     }
 
 }

@@ -28,7 +28,11 @@ import org.springframework.stereotype.Component;
 @Sharable
 public class NettyWebSocketServerHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
 
-     private ChatService chatService = new ChatServiceImpl();
+    private final ChatService chatService;
+
+    public NettyWebSocketServerHandler(ChatService chatService) {
+        this.chatService = chatService;
+    }
 
     /**
      * 读取连接消息并对消息进行处理
@@ -85,7 +89,7 @@ public class NettyWebSocketServerHandler extends SimpleChannelInboundHandler<Web
                 break;
              // 群发消息
             case "GROUP_SENDING":
-                //chatService.groupSend(param, ctx);
+                chatService.sendGroup(params, ctx);
                 break;
              // 发送文件给单个人
             case "FILE_MSG_SINGLE_SENDING":

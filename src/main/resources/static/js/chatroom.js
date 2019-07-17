@@ -18,7 +18,7 @@
                             '<li>' + 
                                 '<div class="liLeft"><img src="' + groupList[i].groupAvatarUrl + '"></div>' +
                                     '<div class="liRight">' +
-                                        '<span class="hidden-groupId">' + groupList[i].groupId + '</span>' + 
+                                        '<span class="hidden-groupId">' + groupList[i].id + '</span>' +
                                         '<span class="intername">' + groupList[i].groupName + '</span>' + 
                                         '<span class="infor"></span>' + 
                                     '</div>' +
@@ -112,6 +112,7 @@
                     "type" : "GROUP_SENDING"
                 };
                 socket.send(JSON.stringify(data));
+                console.log("groupId" + toGroupId)
             } else {
                 alert("Websocket连接没有开启！");
             }
