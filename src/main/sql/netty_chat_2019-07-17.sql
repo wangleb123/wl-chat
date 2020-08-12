@@ -83,7 +83,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `user_chat_relation`;
 
-CREATE TABLE `user_chat_relation` (
+CREATE TABLE `-` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `create_date` datetime DEFAULT NULL COMMENT '创建时间',
   `friends_id` bigint(19) DEFAULT NULL COMMENT '好友id',

@@ -34,15 +34,18 @@ public class NettyWebSocketServerHandler extends SimpleChannelInboundHandler<Web
         this.chatService = chatService;
     }
 
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object webSocketFrame) throws Exception {
+        doHandler(ctx,(WebSocketFrame)webSocketFrame);
+
+    }
+
     /**
      * 读取连接消息并对消息进行处理
-     * @param channelHandlerContext 处理上下文
-     * @param webSocketFrame WebSocket组件
+     * @param ctx 处理上下文
+     * @param frame WebSocket组件
      */
-    @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, WebSocketFrame webSocketFrame) {
-        doHandler(channelHandlerContext,webSocketFrame);
-    }
+
 
     private void doHandler(ChannelHandlerContext ctx, WebSocketFrame frame) {
         if (frame instanceof CloseWebSocketFrame) {
@@ -137,5 +140,10 @@ public class NettyWebSocketServerHandler extends SimpleChannelInboundHandler<Web
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();
         ctx.close();
+    }
+
+    @Override
+    protected void messageReceived(ChannelHandlerContext channelHandlerContext, WebSocketFrame webSocketFrame) throws Exception {
+
     }
 }

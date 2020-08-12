@@ -9,6 +9,7 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
+import io.netty.handler.codec.http2.HttpUtil;
 import io.netty.util.CharsetUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -32,13 +33,20 @@ public class NettyHttpRequestHandler extends SimpleChannelInboundHandler<Object>
      * @param msg 接收对象
      */
     @Override
-    protected void channelRead0(ChannelHandlerContext context, Object msg) {
+    public void channelRead(ChannelHandlerContext context, Object msg) {
         // 如果是Http请求 需要进行协议升级
         if (msg instanceof FullHttpRequest) {
             handleHttpRequest(context,(FullHttpRequest) msg);
         } else if (msg instanceof WebSocketFrame) {
             context.fireChannelRead(((WebSocketFrame) msg).retain());
         }
+
+    }
+
+
+
+    @Override
+    protected void messageReceived(ChannelHandlerContext channelHandlerContext, Object object) throws Exception {
 
     }
 
@@ -80,7 +88,7 @@ public class NettyHttpRequestHandler extends SimpleChannelInboundHandler<Object>
             buf.release();
         }
         // 如果长连接好存在 关闭长连接
-        boolean keepLive = HttpUtil.isKeepAlive(request);
+        boolean keepLive = HttpHeaderUtil.isKeepAlive(request);
         ChannelFuture future = context.channel().writeAndFlush(request);
         if (!keepLive) {
             future.addListener(ChannelFutureListener.CLOSE);
